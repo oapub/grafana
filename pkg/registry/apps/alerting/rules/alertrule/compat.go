@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/apimachinery/utils"
+	"github.com/grafana/grafana/pkg/expr"
 	"github.com/grafana/grafana/pkg/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -43,8 +44,8 @@ func convertToK8sResource(
 			Labels:          make(map[string]string),
 		},
 		Spec: model.AlertRuleSpec{
-			Title: rule.Title,
-			Data:  make(map[string]model.AlertRuleQuery),
+			Title:       rule.Title,
+			Expressions: make(model.AlertRuleExpressionMap),
 			Trigger: model.AlertRuleIntervalTrigger{
 				Interval: model.AlertRulePromDuration(interval.String()),
 			},
@@ -90,11 +91,15 @@ func convertToK8sResource(
 	}
 
 	for _, query := range rule.Data {
-		k8sQuery := model.AlertRuleQuery{
-			QueryType:     query.QueryType,
-			Model:         query.Model,
-			DatasourceUID: model.AlertRuleDatasourceUID(query.DatasourceUID),
-			Source:        util.Pointer(rule.Condition == query.RefID),
+		k8sQuery := model.AlertRuleExpression{
+			Model: query.Model,
+		}
+		if query.QueryType != "" {
+			k8sQuery.QueryType = util.Pointer(query.QueryType)
+		}
+		// DatasourceUID is optional and defaults to expr datasource
+		if !expr.IsDataSource(query.DatasourceUID) {
+			k8sQuery.DatasourceUID = util.Pointer(model.AlertRuleDatasourceUID(query.DatasourceUID))
 		}
 		if time.Duration(query.RelativeTimeRange.From) > 0 || time.Duration(query.RelativeTimeRange.To) > 0 {
 			k8sQuery.RelativeTimeRange = &model.AlertRuleRelativeTimeRange{
@@ -102,7 +107,10 @@ func convertToK8sResource(
 				To:   model.AlertRulePromDurationWMillis(query.RelativeTimeRange.To.String()),
 			}
 		}
-		k8sRule.Spec.Data[query.RefID] = k8sQuery
+		if rule.Condition == query.RefID {
+			k8sQuery.Source = util.Pointer(true)
+		}
+		k8sRule.Spec.Expressions[query.RefID] = k8sQuery
 	}
 
 	for _, setting := range rule.NotificationSettings {
@@ -201,7 +209,7 @@ func convertToBaseDomainModel(orgID int64, k8sRule *model.AlertRule) (*ngmodels.
 		UID:          k8sRule.Name,
 		Title:        k8sRule.Spec.Title,
 		NamespaceUID: k8sRule.Namespace,
-		Data:         make([]ngmodels.AlertQuery, 0, len(k8sRule.Spec.Data)),
+		Data:         make([]ngmodels.AlertQuery, 0, len(k8sRule.Spec.Expressions)),
 		IsPaused:     k8sRule.Spec.Paused != nil && *k8sRule.Spec.Paused,
 		Labels:       make(map[string]string),
 		Annotations:  make(map[string]string),
@@ -267,7 +275,7 @@ func convertToBaseDomainModel(orgID int64, k8sRule *model.AlertRule) (*ngmodels.
 	}
 	domainRule.IntervalSeconds = int64(time.Duration(interval).Seconds())
 
-	for refID, query := range k8sRule.Spec.Data {
+	for refID, query := range k8sRule.Spec.Expressions {
 		domainQuery, err := convertToDomainQuery(query, refID)
 		if err != nil {
 			return nil, err
@@ -339,16 +347,22 @@ func convertNotificationSettings(sourceSettings *model.AlertRuleV0alpha1SpecNoti
 	return settings, nil
 }
 
-func convertToDomainQuery(query model.AlertRuleQuery, refID string) (ngmodels.AlertQuery, error) {
+func convertToDomainQuery(query model.AlertRuleExpression, refID string) (ngmodels.AlertQuery, error) {
 	modelJson, err := json.Marshal(query.Model)
 	if err != nil {
 		return ngmodels.AlertQuery{}, fmt.Errorf("failed to marshal model: %w", err)
 	}
 	domainQuery := ngmodels.AlertQuery{
-		RefID:         refID,
-		QueryType:     query.QueryType,
-		DatasourceUID: string(query.DatasourceUID),
-		Model:         modelJson,
+		RefID: refID,
+		Model: modelJson,
+	}
+	if query.QueryType != nil {
+		domainQuery.QueryType = *query.QueryType
+	}
+	if query.DatasourceUID != nil {
+		domainQuery.DatasourceUID = string(*query.DatasourceUID)
+	} else {
+		domainQuery.DatasourceUID = expr.DatasourceUID
 	}
 	if query.RelativeTimeRange != nil {
 		from, err := prom_model.ParseDuration(string(query.RelativeTimeRange.From))

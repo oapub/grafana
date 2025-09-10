@@ -25,7 +25,7 @@ import (
 )
 
 type Historian interface {
-	Record(ctx context.Context, opts historianModels.RecordOpts)
+	Record(ctx context.Context, opts historianModels.Record)
 }
 
 // ScheduleService is an interface for a service that schedules the evaluation

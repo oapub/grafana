@@ -15,13 +15,13 @@ const (
 	EvalStatusProcessError EvalStatus = "process-error"
 )
 
-type RecordOpts struct {
+type Record struct {
 	Attempt         int
 	RuleKey         models.AlertRuleKey
 	GroupKey        models.AlertRuleGroupKey
 	RuleFingerprint string
 	Status          EvalStatus
-	Error           error
+	Error           string
 	Duration        time.Duration
 	Tick            time.Time
 	EvaluationTime  time.Time

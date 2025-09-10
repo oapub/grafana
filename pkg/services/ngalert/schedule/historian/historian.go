@@ -69,7 +69,7 @@ func NewHistorian(
 	}
 }
 
-func (h *Historian) Record(ctx context.Context, opts historianModels.RecordOpts) {
+func (h *Historian) Record(ctx context.Context, opts historianModels.Record) {
 	logger := h.log.FromContext(ctx)
 	stream, err := h.prepareStream(opts)
 	if err != nil {
@@ -87,7 +87,7 @@ func (h *Historian) Record(ctx context.Context, opts historianModels.RecordOpts)
 	}
 }
 
-func (h *Historian) prepareStream(opts historianModels.RecordOpts) (lokiclient.Stream, error) {
+func (h *Historian) prepareStream(opts historianModels.Record) (lokiclient.Stream, error) {
 	entry := EvaluationHistoryLokiEntry{
 		SchemaVersion: 1,
 		RuleUID:       opts.RuleKey.UID,
@@ -96,9 +96,7 @@ func (h *Historian) prepareStream(opts historianModels.RecordOpts) (lokiclient.S
 		Attempt:       int64(opts.Attempt),
 		Duration:      opts.Duration.Milliseconds(),
 		Status:        string(opts.Status),
-	}
-	if opts.Error != nil {
-		entry.Error = opts.Error.Error()
+		Error:         opts.Error,
 	}
 
 	entryJSON, err := json.Marshal(entry)

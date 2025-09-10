@@ -232,14 +232,18 @@ func (r *recordingRule) doEvaluate(ctx context.Context, ev *Evaluation) {
 
 		if r.historian != nil {
 			duration := r.clock.Since(start)
-			go r.historian.Record(ctx, historianModels.RecordOpts{
+			statusErr := ""
+			if err != nil {
+				statusErr = err.Error()
+			}
+			go r.historian.Record(ctx, historianModels.Record{
 				Attempt:         attempt,
 				RuleKey:         ev.rule.GetKey(),
 				GroupKey:        ev.rule.GetGroupKey(),
 				EvaluationTime:  start,
 				RuleFingerprint: ev.Fingerprint().String(),
 				Status:          status,
-				Error:           err,
+				Error:           statusErr,
 				Duration:        duration,
 				Tick:            ev.scheduledAt,
 				Version:         ev.rule.Version,

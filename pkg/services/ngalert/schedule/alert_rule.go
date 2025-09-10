@@ -355,19 +355,24 @@ func (a *alertRule) Run() error {
 					if a.historian != nil {
 						duration := a.clock.Since(start)
 						status := historianModels.EvalStatusSuccess
+						var statusErr string
 						if results.IsError() || err != nil {
 							status = historianModels.EvalStatusEvalError
-						}
-						if results.IsNoData() {
+							if err != nil {
+								statusErr = err.Error()
+							} else {
+								statusErr = results.Error().Error()
+							}
+						} else if results.IsNoData() {
 							status = historianModels.EvalStatusNoData
 						}
-						go a.historian.Record(grafanaCtx, historianModels.RecordOpts{
+						go a.historian.Record(grafanaCtx, historianModels.Record{
 							Attempt:         attempt,
 							RuleKey:         ctx.rule.GetKey(),
 							GroupKey:        ctx.rule.GetGroupKey(),
 							RuleFingerprint: ctx.Fingerprint().String(),
 							Status:          status,
-							Error:           err,
+							Error:           statusErr,
 							Duration:        duration,
 							EvaluationTime:  start,
 							Tick:            ctx.scheduledAt,

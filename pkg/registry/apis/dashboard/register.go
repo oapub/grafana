@@ -269,6 +269,11 @@ func (b *DashboardsAPIBuilder) validateDelete(ctx context.Context, a admission.A
 		return fmt.Errorf("expected v1.DeleteOptions")
 	}
 
+	// TODO: handle this for the standalone case
+	if b.isStandalone {
+		return nil
+	}
+
 	// Skip validation for forced deletions (grace period = 0)
 	if deleteOptions.GracePeriodSeconds != nil && *deleteOptions.GracePeriodSeconds == 0 {
 		return nil

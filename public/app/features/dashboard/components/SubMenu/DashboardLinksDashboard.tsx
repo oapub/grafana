@@ -7,19 +7,12 @@ import { sanitize, sanitizeUrl } from '@grafana/data/internal';
 import { selectors } from '@grafana/e2e-selectors';
 import { t } from '@grafana/i18n';
 import { DashboardLink } from '@grafana/schema';
-import { Dropdown, Icon, LinkButton, Button, Menu, ScrollContainer, useStyles2 } from '@grafana/ui';
+import { Dropdown, Icon, LinkButton, Button, Menu, ScrollContainer, useStyles2, type ButtonFill } from '@grafana/ui';
 import { ButtonLinkProps } from '@grafana/ui/internal';
 import { getBackendSrv } from 'app/core/services/backend_srv';
 import { DashboardSearchItem } from 'app/features/search/types';
 
 import { getLinkSrv } from '../../../panel/panellinks/link_srv';
-
-interface Props {
-  link: DashboardLink;
-  linkInfo: { title: string; href: string };
-  dashboardUID: string;
-  scopedVars?: ScopedVars;
-}
 
 interface DashboardLinksMenuProps {
   link: DashboardLink;
@@ -60,8 +53,18 @@ function DashboardLinksMenu({ dashboardUID, link }: DashboardLinksMenuProps) {
   );
 }
 
-export const DashboardLinksDashboard = (props: Props) => {
-  const { link, linkInfo, dashboardUID } = props;
+interface DashboardLinksDashboardProps {
+  link: DashboardLink;
+  linkInfo: { title: string; href: string };
+  dashboardUID: string;
+  scopedVars?: ScopedVars;
+  buttonFill?: ButtonFill;
+  // Only for dashboard links. This will render the dashboard links as Menu.Item children, so they can be used in an already existing dropwdown.
+  renderAsSubMenu?: boolean;
+}
+
+export const DashboardLinksDashboard = (props: DashboardLinksDashboardProps) => {
+  const { link, linkInfo, dashboardUID, buttonFill = 'outline', renderAsSubMenu } = props;
   const resolvedLinks = useResolvedLinks(props);
   const styles = useStyles2(getStyles);
 
@@ -73,7 +76,7 @@ export const DashboardLinksDashboard = (props: Props) => {
           data-toggle="dropdown"
           aria-controls="dropdown-list"
           aria-haspopup="menu"
-          fill="outline"
+          fill={buttonFill}
           variant="secondary"
           data-testid={selectors.components.DashboardLinks.dropDown}
         >
@@ -84,30 +87,50 @@ export const DashboardLinksDashboard = (props: Props) => {
     );
   }
 
+  if (resolvedLinks.length === 0) {
+    return null;
+  }
+
+  if (renderAsSubMenu) {
+    return (
+      <Menu.Item
+        label={item.text}
+        icon={item.iconClassName}
+        childItems={item.subMenu ? renderItems(item.subMenu) : undefined}
+        url={item.href}
+        onClick={item.onClick}
+        shortcut={item.shortcut}
+        testId={selectors.components.Panels.Panel.menuItems(item.text)}
+      />
+    );
+  }
+
   return (
     <>
-      {resolvedLinks.length > 0 &&
-        resolvedLinks.map((resolvedLink, index) => {
-          return (
-            <DashboardLinkButton
-              key={`dashlinks-list-item-${resolvedLink.uid}-${index}`}
-              icon="apps"
-              variant="secondary"
-              fill="outline"
-              href={resolvedLink.url}
-              target={link.targetBlank ? '_blank' : undefined}
-              rel="noreferrer"
-              data-testid={selectors.components.DashboardLinks.link}
-            >
-              {resolvedLink.title}
-            </DashboardLinkButton>
-          );
-        })}
+      {resolvedLinks.map((resolvedLink, index) => {
+        return (
+          <DashboardLinkButton
+            key={`dashlinks-list-item-${resolvedLink.uid}-${index}`}
+            icon="apps"
+            variant="secondary"
+            fill={buttonFill}
+            href={resolvedLink.url}
+            target={link.targetBlank ? '_blank' : undefined}
+            rel="noreferrer"
+            data-testid={selectors.components.DashboardLinks.link}
+          >
+            {resolvedLink.title}
+          </DashboardLinkButton>
+        );
+      })}
     </>
   );
 };
 
-const useResolvedLinks = ({ link, dashboardUID }: Pick<Props, 'link' | 'dashboardUID'>): ResolvedLinkDTO[] => {
+const useResolvedLinks = ({
+  link,
+  dashboardUID,
+}: Pick<DashboardLinksDashboardProps, 'link' | 'dashboardUID'>): ResolvedLinkDTO[] => {
   const { tags } = link;
   const result = useAsync(() => searchForTags(tags), [tags]);
   if (!result.value) {
@@ -174,18 +197,20 @@ function getStyles(theme: GrafanaTheme2) {
   };
 }
 
-export const DashboardLinkButton = forwardRef<unknown, ButtonLinkProps>(({ className, ...otherProps }, ref) => {
-  const styles = useStyles2(getStyles);
-  const Component = otherProps.href ? LinkButton : Button;
-  return (
-    <Component
-      {...otherProps}
-      variant="secondary"
-      fill="outline"
-      className={cx(className, styles.dashButton)}
-      ref={ref as any}
-    />
-  );
-});
+export const DashboardLinkButton = forwardRef<unknown, ButtonLinkProps>(
+  ({ className, fill = 'outline', ...otherProps }, ref) => {
+    const styles = useStyles2(getStyles);
+    const Component = otherProps.href ? LinkButton : Button;
+    return (
+      <Component
+        {...otherProps}
+        variant="secondary"
+        fill={fill}
+        className={cx(className, styles.dashButton)}
+        ref={ref as any}
+      />
+    );
+  }
+);
 
 DashboardLinkButton.displayName = 'DashboardLinkButton';

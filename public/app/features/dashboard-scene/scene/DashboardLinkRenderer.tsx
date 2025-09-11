@@ -1,7 +1,7 @@
 import { sanitizeUrl } from '@grafana/data/internal';
 import { selectors } from '@grafana/e2e-selectors';
 import { DashboardLink } from '@grafana/schema';
-import { Tooltip } from '@grafana/ui';
+import { Tooltip, type ButtonFill } from '@grafana/ui';
 import {
   DashboardLinkButton,
   DashboardLinksDashboard,
@@ -13,13 +13,14 @@ import { LINK_ICON_MAP } from '../settings/links/utils';
 export interface Props {
   link: DashboardLink;
   dashboardUID: string;
+  buttonFill?: ButtonFill;
 }
 
-export function DashboardLinkRenderer({ link, dashboardUID }: Props) {
+export function DashboardLinkRenderer({ link, dashboardUID, buttonFill = 'outline' }: Props) {
   const linkInfo = getLinkSrv().getAnchorInfo(link);
 
   if (link.type === 'dashboards') {
-    return <DashboardLinksDashboard link={link} linkInfo={linkInfo} dashboardUID={dashboardUID} />;
+    return <DashboardLinksDashboard link={link} linkInfo={linkInfo} dashboardUID={dashboardUID} fill={buttonFill} />;
   }
 
   const icon = LINK_ICON_MAP[link.icon];
@@ -31,6 +32,7 @@ export function DashboardLinkRenderer({ link, dashboardUID }: Props) {
       target={link.targetBlank ? '_blank' : undefined}
       rel="noreferrer"
       data-testid={selectors.components.DashboardLinks.link}
+      fill={buttonFill}
     >
       {linkInfo.title}
     </DashboardLinkButton>

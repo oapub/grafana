@@ -2,7 +2,14 @@ import { css, cx } from '@emotion/css';
 
 import { VariableHide, GrafanaTheme2 } from '@grafana/data';
 import { selectors } from '@grafana/e2e-selectors';
-import { sceneGraph, useSceneObjectState, SceneVariable, SceneVariableState, ControlsLabel } from '@grafana/scenes';
+import {
+  sceneGraph,
+  useSceneObjectState,
+  SceneVariable,
+  SceneVariableState,
+  ControlsLabel,
+  ControlsLayout,
+} from '@grafana/scenes';
 import { useElementSelection, useStyles2 } from '@grafana/ui';
 
 import { DashboardScene } from './DashboardScene';
@@ -23,9 +30,10 @@ export function VariableControls({ dashboard }: { dashboard: DashboardScene }) {
 
 interface VariableSelectProps {
   variable: SceneVariable;
+  layout?: ControlsLayout;
 }
 
-export function VariableValueSelectWrapper({ variable }: VariableSelectProps) {
+export function VariableValueSelectWrapper({ variable, layout = 'horizontal' }: VariableSelectProps) {
   const state = useSceneObjectState<SceneVariableState>(variable, { shouldActivateOrKeepAlive: true });
   const { isSelected, onSelect, isSelectable } = useElementSelection(variable.state.key);
   const styles = useStyles2(getStyles);
@@ -60,19 +68,28 @@ export function VariableValueSelectWrapper({ variable }: VariableSelectProps) {
     <div
       className={cx(
         styles.container,
+        layout === 'vertical' && styles.containerVertical,
         isSelected && 'dashboard-selected-element',
         isSelectable && !isSelected && 'dashboard-selectable-element'
       )}
       onPointerDown={onPointerDown}
       data-testid={selectors.pages.Dashboard.SubMenu.submenuItem}
     >
-      <VariableLabel variable={variable} className={cx(isSelectable && styles.labelSelectable)} />
+      <VariableLabel variable={variable} layout={layout} className={cx(isSelectable && styles.labelSelectable)} />
       <variable.Component model={variable} />
     </div>
   );
 }
 
-function VariableLabel({ variable, className }: { variable: SceneVariable; className?: string }) {
+function VariableLabel({
+  variable,
+  layout,
+  className,
+}: {
+  variable: SceneVariable;
+  layout: ControlsLayout;
+  className?: string;
+}) {
   const { state } = variable;
 
   if (variable.state.hide === VariableHide.hideLabel) {
@@ -89,7 +106,7 @@ function VariableLabel({ variable, className }: { variable: SceneVariable; class
       onCancel={() => variable.onCancel?.()}
       label={labelOrName}
       error={state.error}
-      layout={'horizontal'}
+      layout={layout}
       description={state.description ?? undefined}
       className={className}
     />
@@ -104,6 +121,9 @@ const getStyles = (theme: GrafanaTheme2) => ({
       borderTopLeftRadius: 'unset',
       borderBottomLeftRadius: 'unset',
     }),
+  }),
+  containerVertical: css({
+    flexDirection: 'column',
   }),
   labelWrapper: css({
     display: 'flex',

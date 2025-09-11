@@ -242,6 +242,7 @@ export {
   LinkButton,
   type ButtonVariant,
   type ButtonProps,
+  type ButtonFill,
   clearButtonStyles,
 } from './components/Button/Button';
 export { ButtonGroup } from './components/Button/ButtonGroup';

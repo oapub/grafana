@@ -228,7 +228,7 @@ require (
 	pgregory.net/rapid v1.2.0 // @grafana/grafana-operator-experience-squad
 	sigs.k8s.io/randfill v1.0.0 // @grafana/grafana-app-platform-squad
 	sigs.k8s.io/structured-merge-diff/v4 v4.7.0 // @grafana-app-platform-squad
-	xorm.io/builder v0.3.6 // @grafana/grafana-backend-group
+	xorm.io/builder v0.3.13 // @grafana/grafana-backend-group
 )
 
 require (

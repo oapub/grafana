@@ -203,7 +203,7 @@ require (
 	golang.org/x/mod v0.27.0 // indirect; @grafana/grafana-backend-group
 	golang.org/x/net v0.43.0 // @grafana/oss-big-tent @grafana/partner-datasources
 	golang.org/x/oauth2 v0.30.0 // @grafana/identity-access-team
-	golang.org/x/sync v0.16.0 // @grafana/alerting-backend
+	golang.org/x/sync v0.17.0 // @grafana/alerting-backend
 	golang.org/x/text v0.28.0 // @grafana/grafana-backend-group
 	golang.org/x/time v0.11.0 // @grafana/grafana-backend-group
 	golang.org/x/tools v0.36.0 // indirect; @grafana/grafana-as-code

@@ -11797,7 +11797,7 @@ __metadata:
 
 "axios@npm:^1, axios@npm:^1.7.9, axios@npm:^1.8.3, axios@npm:^1.9.0":
   version: 1.10.0
-  resolution: "axios@npm:1.10.0"
+  resolution: "axios@npm:1.12.0"
   dependencies:
     follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.0"

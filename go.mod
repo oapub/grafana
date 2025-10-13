@@ -199,7 +199,7 @@ require (
 	gocloud.dev v0.42.0 // @grafana/grafana-app-platform-squad
 	gocloud.dev/secrets/hashivault v0.42.0 // @grafana/grafana-operator-experience-squad
 	golang.org/x/crypto v0.41.0 // @grafana/grafana-backend-group
-	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6 // @grafana/alerting-backend
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // @grafana/alerting-backend
 	golang.org/x/mod v0.27.0 // indirect; @grafana/grafana-backend-group
 	golang.org/x/net v0.43.0 // @grafana/oss-big-tent @grafana/partner-datasources
 	golang.org/x/oauth2 v0.30.0 // @grafana/identity-access-team
@@ -224,7 +224,7 @@ require (
 	k8s.io/kube-aggregator v0.33.3 // @grafana/grafana-app-platform-squad
 	k8s.io/kube-openapi v0.0.0-20250318190949-c8a335a9a2ff // @grafana/grafana-app-platform-squad
 	k8s.io/utils v0.0.0-20241210054802-24370beab758 // @grafana/partner-datasources
-	modernc.org/sqlite v1.37.0 // @grafana/grafana-backend-group
+	modernc.org/sqlite v1.39.1 // @grafana/grafana-backend-group
 	pgregory.net/rapid v1.2.0 // @grafana/grafana-operator-experience-squad
 	sigs.k8s.io/randfill v1.0.0 // @grafana/grafana-app-platform-squad
 	sigs.k8s.io/structured-merge-diff/v4 v4.7.0 // @grafana-app-platform-squad
@@ -619,7 +619,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go4.org/netipx v0.0.0-20230125063823-8449b0a6169f // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/term v0.34.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
@@ -635,9 +635,9 @@ require (
 	gopkg.in/telebot.v3 v3.2.1 // indirect
 	k8s.io/apiextensions-apiserver v0.33.3 // indirect
 	k8s.io/kms v0.33.3 // indirect
-	modernc.org/libc v1.65.0 // indirect
+	modernc.org/libc v1.66.10 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.10.0 // indirect
+	modernc.org/memory v1.11.0 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.31.2 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/yaml v1.5.0 // indirect

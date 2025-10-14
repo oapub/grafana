@@ -291,7 +291,7 @@ jobs:
 
       # Setting nodejs up just for npm publish. Not restoring the cache for all our dependencies
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
 
